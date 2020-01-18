@@ -3,6 +3,9 @@ const fs = require('fs');
 
 const app = express();
 
+// middleware, modifies incoming data
+app.use(express.json());
+
 // on get request to '/''
 // app.get('/', (req, res) => {
 //   // 200 = ok, just sending back a 'hello', right into the body
@@ -24,10 +27,10 @@ const port = 3000;
 
 // file containing tours, reading the file outside for non-blocking reasons
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`) // server will reload whenever this file gets modified
 ); // parsed to javascript object
 
-// sends back tours data
+// sends back tours data to client
 app.get(`${apiVersion}/tours`, (req, res) => {
   res.status(200).json({
     status: 'success',
@@ -36,6 +39,29 @@ app.get(`${apiVersion}/tours`, (req, res) => {
       tours: tours
     }
   });
+});
+
+// receives data from client
+app.post(`${apiVersion}/tours`, (req, res) => {
+  //console.log(req.body); // needs middleware, to work
+  const newId = tours[tours.length - 1].id + 1; // the last tour id plus 1
+  const newTour = Object.assign({ id: newId }, req.body); // inserts variable within object
+
+  tours.push(newTour); // insert new tour into "database"
+
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours), // needs to be converted back to string, remember
+    err => {
+      res.status(201).json({
+        // 201 stands for created status
+        status: 'success',
+        data: {
+          tour: newTour
+        }
+      });
+    }
+  ); // write it donw asynchronously into the file
 });
 
 // starts the server listening;
