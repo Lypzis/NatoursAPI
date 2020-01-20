@@ -88,6 +88,39 @@ app.post(`${apiVersion}/tours`, (req, res) => {
   ); // write it donw asynchronously into the file
 });
 
+// for update data
+app.patch(`${apiVersion}/tours/:id`, (req, res) => {
+  // in case an invalid id is entered, this is just temporary sanitization
+  if (req.params.id * 1 > tours.length - 1)
+    return res.status(404).send({
+      status: 'fail',
+      message: 'Invalid ID'
+    });
+
+  // An update is not actually implemented here,
+  // it is just for show purposes
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour: '<Updated tour here>'
+    }
+  });
+});
+
+app.delete(`${apiVersion}/tours/:id`, (req, res) => {
+  if (req.params.id * 1 > tours.length - 1)
+    return res.status(404).send({
+      status: 'fail',
+      message: 'Invalid ID'
+    });
+
+  // case of delete, status is 204(no content), data is null
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});
+
 // starts the server listening;
 app.listen(port, () => {
   console.log(`App running on port ${port}...`); // callback when starts listening
