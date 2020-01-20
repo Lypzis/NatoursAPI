@@ -41,6 +41,30 @@ app.get(`${apiVersion}/tours`, (req, res) => {
   });
 });
 
+// ':id' the variable containing an id ... duh :D, the url can have multiple variables like this
+// for an optional variable: ':duration?'
+// the params are STRING, that is important to remember
+app.get(`${apiVersion}/tours/:id/:duration?`, (req, res) => {
+  //console.log(req.params);
+
+  const id = parseInt(req.params.id); // or req.params.id * 1 :D
+  const tour = tours.find(el => el.id === id);
+
+  // in case an invalid id is entered, this is just temporary sanitization
+  if (!tour)
+    return res.status(404).send({
+      status: 'fail',
+      message: 'Invalid ID'
+    });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour
+    }
+  });
+});
+
 // receives data from client
 app.post(`${apiVersion}/tours`, (req, res) => {
   //console.log(req.body); // needs middleware, to work
