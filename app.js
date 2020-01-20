@@ -6,9 +6,6 @@ const app = express();
 // middleware, modifies incoming data
 app.use(express.json());
 
-const apiVersion = '/api/v1';
-const port = 3000;
-
 // file containing tours, reading the file outside for non-blocking reasons
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`) // server will reload whenever this file gets modified
@@ -97,23 +94,31 @@ const deleteTour = (req, res) => {
   });
 };
 
-// EVENT HANDLERS /////////////////////////////
+// ROUTE HANDLERS /////////////////////////////
 
-// sends back tours data to client
-app.get(`${apiVersion}/tours`, getAllTours);
+// app.get(`${apiVersion}/tours`, getAllTours);
+// app.post(`${apiVersion}/tours`, createTour);
+// app.patch(`${apiVersion}/tours/:id`, updateTour);
+// app.delete(`${apiVersion}/tours/:id`, deleteTour);
+// app.get(`${apiVersion}/tours/:id/:duration?`, getTour);
 
 // ':id' the variable containing an id ... duh :D, the url can have multiple variables like this
 // for an optional variable: ':duration?'
 // the params are STRING, that is important to remember
-app.get(`${apiVersion}/tours/:id/:duration?`, getTour);
 
-// receives data from client
-app.post(`${apiVersion}/tours`, createTour);
+const apiVersion = '/api/v1';
+const port = 3000;
 
-// for update data
-app.patch(`${apiVersion}/tours/:id`, updateTour);
-
-app.delete(`${apiVersion}/tours/:id`, deleteTour);
+// for routes that look the same
+app
+  .route(`${apiVersion}/tours`)
+  .get(getAllTours)
+  .post(createTour);
+app
+  .route(`${apiVersion}/tours/:id/:duration?`)
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 // starts the server listening;
 app.listen(port, () => {
