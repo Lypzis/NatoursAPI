@@ -45,13 +45,8 @@ app.use((req, res, next) => {
 // the params are STRING, that is important to remember
 
 const apiVersion = '/api/v1';
-const port = 3000;
 
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);
 
-// starts the server listening;
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`); // callback when starts listening
-});
-///////////////////////////////////////
+module.exports = app;
