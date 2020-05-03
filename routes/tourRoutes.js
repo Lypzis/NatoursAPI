@@ -9,6 +9,12 @@ const router = express.Router();
 // before proceding.
 //router.param('id', tourController.checkID);
 
+// will use a middleware to bring on the results
+// that are in accordance with the alias route: 'top-5-cheap' :D
+router
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours);
+
 router
   .route('/')
   .get(tourController.getAllTours)

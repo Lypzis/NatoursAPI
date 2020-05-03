@@ -1,5 +1,6 @@
 //const fs = require('fs');
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 // Just for test purposes
 // file containing tours, reading the file outside for non-blocking reasons
@@ -38,28 +39,29 @@ const Tour = require('../models/tourModel');
 //   next();
 // };
 
+// another middleware
+// this one prefills query string
+// givin an specific result, according
+// to what I want to show in that specif route
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
-    // BUILD QUERY
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-
-    // deletes fields that matches in the 'queryObj' keys
-    excludedFields.forEach(el => delete queryObj[el]);
-
-    // nice way of filtering :D
-    // console.log(req.query);
-    const query = Tour.find(queryObj); // without parameters, it returns everything;
-
-    // The above is the easier way to use
-    // const query = Tour.find()
-    //   .where('duration')
-    //   .equals(5)
-    //   .where('difficulty')
-    //   .equals('easy');
+    //console.log(req.query);
 
     // EXECUTE QUERY
-    const tours = await query; // await for the query
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const tours = await features.query; // await for the query
 
     // SEND RESPONSE
     res.status(200).json({
@@ -72,7 +74,7 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'fail',
-      message: 'Could not retrieve the tours.'
+      message: err
     });
   }
 };

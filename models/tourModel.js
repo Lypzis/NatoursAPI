@@ -40,7 +40,8 @@ const tourSchema = new mongoose.Schema({
   images: [String],
   createdAt: {
     type: Date,
-    default: Date.now()
+    default: Date.now(),
+    select: false // with this, it will no longer be sent to user
   },
   startDate: [Date]
 });
