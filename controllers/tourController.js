@@ -161,3 +161,51 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
+
+// almost like 'group by' remember?
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: {
+          ratingsAverage: { $gte: 4.5 } //bring tours that match this
+        }
+      },
+      {
+        $group: {
+          // the '_id' identifies by what should the groups be separated into
+          //_id: '$ratingsAverage', // 'null' brings all tours
+          _id: { $toUpper: '$difficulty' }, // 'null' brings all tours
+          num: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' }
+        }
+      },
+      {
+        $sort: {
+          avgPrice: 1 // will sort by one of the above attributes created, '1' is ASC
+        }
+      }
+      // {
+      //   $match: { // shows that match can be done multiple times
+      //     _id: { $ne: 'EASY' }
+      //   }
+      // }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err
+    });
+  }
+};
