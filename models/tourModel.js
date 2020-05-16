@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -13,6 +14,13 @@ const tourSchema = new mongoose.Schema(
         'A tour name must have less or be equal to 40 characters'
       ], // a validator
       minlength: [10, 'A tour name must have less or be equal to 40 characters'] // another validator
+      // will check if contains only letters, check 'validator' docs
+      // also trhows errors if it find spaces between words,
+      // so not very useful here
+      // validate: [
+      //   validator.isAlpha,
+      //   'Tour name must only contain letters a-z,A-Z.'
+      // ]
     },
     slug: String,
     duration: {
@@ -43,7 +51,19 @@ const tourSchema = new mongoose.Schema(
       default: 0
     },
     price: { type: Number, required: [true, 'A tour must have a price.'] },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          // this validator won't work on update though, only in creation
+          // 'this' only points to current doc on NEW document creation
+          // val = priceDiscount
+          return val < this.price; // the price discount should always be lower than the price
+        },
+        // mongoose sintax '{VALUE}' will change it for the actual 'priceDiscount' value
+        message: 'Discount price ({VALUE}) should be below regular price.'
+      }
+    },
     summary: {
       type: String,
       trim: true,
@@ -90,7 +110,7 @@ tourSchema.virtual('durationWeeks').get(function () {
 }); // created on each get
 
 // DOCUMENT MIDDLEWARE, which will run before an event
-// in this case the 'save' (only runs on .save() and .create())
+// in this case the 'save' (only runs on .save() and .create()), not for update
 tourSchema.pre('save', function (next) {
   // this.slug needs to be defined in the schema first in order to be saved
   this.slug = slugify(this.name, { lower: true }); // will replace the tour name characters to lower case characters
