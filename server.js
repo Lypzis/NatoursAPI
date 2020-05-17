@@ -31,6 +31,6 @@ const port = process.env.PORT || 3000;
 
 // starts the server listening;
 app.listen(port, () => {
-  //console.log(`App running on port ${port}...`); // callback when starts listening
+  console.log(`App running on port ${port}...`); // callback when starts listening
 });
 ///////////////////////////////////////
