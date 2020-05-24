@@ -1,6 +1,18 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
+// UNCAUGHT EXCEPTIONS
+// obs: needs to be at the top, the first to start listening
+process.on('uncaughtException', err => {
+  console.log('UNCAUGHT EXCEPTION! Shutting down...');
+  console.log(err.name, err.message);
+
+  process.exit(1);
+});
+
+// 'x' doesn't exists so it will throw an uncaught exception
+//console.log(x);
+
 // run this before anything else,
 // or you will get undefined variables
 dotenv.config({ path: './config.env' });
@@ -38,11 +50,10 @@ const server = app.listen(port, () => {
 
 // UNHANDLED SERVER REJECTIONS
 process.on('unhandledRejection', err => {
-  console.log(err.name, err.message);
-
   // if gets to this point, there isn't much else to do :(
   // only exit and pass '1' for 'rejection'
   console.log('UNHANDLER REJECTION! Shutting down...');
+  console.log(err.name, err.message);
 
   // server.close finishes all the pending requests first
   // and then shuts down gracefully, ALWAYS DO LIKE THIS,

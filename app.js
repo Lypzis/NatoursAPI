@@ -38,6 +38,8 @@ app.use((req, res, next) => {
   // custom var given to the request
   req.requestTime = new Date().toISOString();
 
+  //console.log(x); //testing uncaught exceptions
+
   next();
 });
 /////////////////////////////////////////
