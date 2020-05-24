@@ -24,13 +24,30 @@ mongoose
     useFindAndModify: false
   })
   .then(() => console.log('DB connection successful!'));
+//.catch(err => console.log('Error'));
 
 // The port defined in config.env
 // otherwise defaults to 3000
 const port = process.env.PORT || 3000;
 
 // starts the server listening;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`); // callback when starts listening
 });
 ///////////////////////////////////////
+
+// UNHANDLED SERVER REJECTIONS
+process.on('unhandledRejection', err => {
+  console.log(err.name, err.message);
+
+  // if gets to this point, there isn't much else to do :(
+  // only exit and pass '1' for 'rejection'
+  console.log('UNHANDLER REJECTION! Shutting down...');
+
+  // server.close finishes all the pending requests first
+  // and then shuts down gracefully, ALWAYS DO LIKE THIS,
+  // instead of directly calling process.exit
+  server.close(() => {
+    process.exit(1);
+  });
+});

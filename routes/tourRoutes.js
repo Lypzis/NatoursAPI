@@ -21,6 +21,9 @@ router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
+  // catchAsync can be applied here as '.get(catchAsync(tourController.getAllTours))'
+  // and to all the other ones but it wouldn't be a good practice,
+  // since here, it is difficult to track which function is actually async
   .get(tourController.getAllTours)
   .post(tourController.createTour); //(tourController.checkBody, tourController.createTour)
 
