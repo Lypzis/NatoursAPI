@@ -1,6 +1,7 @@
 const express = require('express');
 
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
@@ -24,13 +25,18 @@ router
   // catchAsync can be applied here as '.get(catchAsync(tourController.getAllTours))'
   // and to all the other ones but it wouldn't be a good practice,
   // since here, it is difficult to track which function is actually async
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours)
   .post(tourController.createTour); //(tourController.checkBody, tourController.createTour)
 
 router
   .route('/:id')
   .get(tourController.getTour)
   .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+  .delete(
+    // this is restricted to loged in admins, simple as that :D
+    authController.protect,
+    authController.restrictedTo('admin', 'lead-guide'),
+    tourController.deleteTour
+  );
 
 module.exports = router;

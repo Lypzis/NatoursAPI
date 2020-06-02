@@ -5,8 +5,12 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-// for signup only post is needed
+// for signup or login, only post is needed
 router.post('/signup', authController.signup);
+router.post('/login', authController.login);
+
+router.post('/forgotPassword', authController.forgotPassword);
+router.post('/resetPassword', authController.resetPassword);
 
 router
   .route('/')

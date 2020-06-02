@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -17,10 +18,16 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Please provide a valid email'] // custom validator
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user'
+  },
   password: {
     type: String,
     required: [true, 'Please provide your password.'],
-    minlength: [8, 'Your password must have 8 or more characters']
+    minlength: [8, 'Your password must have 8 or more characters'],
+    select: false // won't be returned to client, because this would be obviously a security flaw, even if encrypted
   },
   passwordConfirm: {
     type: String,
@@ -32,7 +39,10 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Passwords are not the same!'
     }
-  }
+  },
+  passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date
 });
 
 // PASSWORD ENCRYPTION MIDDLEWARE
@@ -53,6 +63,52 @@ userSchema.pre('save', async function (next) {
 
   next();
 });
+
+// INSTANCE METHOD
+/**
+ * Compares the client password with the hashed stored.
+ * candidatePassword - The password typed
+ * userPassword - The hashed password
+ */
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword); // true if equal, false if not
+};
+
+/**
+ * Verifies if user changed password after the token was issued.
+ */
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    //console.log(changedTimestamp, JWTTimestamp);
+
+    return JWTTimestamp < changedTimestamp; // '100 < 200', No time traveleres, OK
+  }
+
+  // If with the condition above or here returns false, it means not changed
+  return false;
+};
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // expires in 10 minutes
+
+  return resetToken;
+};
 
 const User = mongoose.model('User', userSchema);
 

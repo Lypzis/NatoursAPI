@@ -148,7 +148,7 @@ tourSchema.pre(/^find/, function (next) {
 // 'post' happens after the find executes and 'pre' before, just to make things clear :D
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took: ${Date.now() - this.start} milliseconds!`);
-  console.log(docs);
+  //console.log(docs);
   next();
 });
 

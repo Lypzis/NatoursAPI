@@ -1,5 +1,11 @@
 const AppError = require('../utils/appError');
 
+const handleJWTError = () =>
+  new AppError('Invalid token. Please log in again!', 401);
+
+const handleJWTExpireError = () =>
+  new AppError('Your token has expired, Please log in again!', 401);
+
 /**
  * Turns a mongoose 'CastError' error
  * into an human readable error when
@@ -87,6 +93,10 @@ module.exports = (err, req, res, next) => {
 
     if (error.name === 'ValidationError')
       error = handleValidationErrorDB(error);
+
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+
+    if (error.name === 'TokenExpiredError') error = handleJWTExpireError();
 
     sendErrorProd(error, res);
   }
