@@ -59,7 +59,7 @@ app.use((req, res, next) => {
 // the params are STRING, that is important to remember
 
 // ROUTES
-const apiVersion = '/api/v1';
+const apiVersion = `/api/v1`;
 
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);

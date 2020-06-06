@@ -64,6 +64,21 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+/**
+ * Update changePasswordAt property for the user
+ */
+userSchema.pre('save', function (next) {
+  // If password hasn't been modified or it is a new document, exit right away
+  if (!this.isModified('password') || this.isNew) return next();
+
+  // else
+  // Actual date minus 1 second for a better timestamp accuracy,
+  // making sure that the token is generated after the password has been changed
+  this.passwordChangedAt = Date.now() - 1000;
+
+  next();
+});
+
 // INSTANCE METHOD
 /**
  * Compares the client password with the hashed stored.
