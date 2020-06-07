@@ -42,7 +42,12 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 // PASSWORD ENCRYPTION MIDDLEWARE
@@ -76,6 +81,15 @@ userSchema.pre('save', function (next) {
   // making sure that the token is generated after the password has been changed
   this.passwordChangedAt = Date.now() - 1000;
 
+  next();
+});
+
+// This middleware will ensure that only active
+// users are returned when a 'find' user(s) is used
+// Remember, this regex is for strings that start with 'find'
+userSchema.pre(/^find/, function (next) {
+  //this points to the current query
+  this.find({ active: { $ne: false } }); // $ne mongoose for not equal
   next();
 });
 

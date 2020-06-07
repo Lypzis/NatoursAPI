@@ -1,6 +1,10 @@
 const express = require('express');
-
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -13,14 +17,50 @@ const { env } = process;
 
 // MIDDLEWARES /////////////////////////
 
-//3rd party middleware for logging;
+// Set security HTTP headers
+app.use(helmet());
+app.use(helmet.hidePoweredBy({ setTo: 'PHP 7.4.6' })); // :DDDD
+
+//3rd party middleware for development logging to console;
 // which only occurs now when the
 // environment is 'development'
 if (env.NODE_ENV === 'development') app.use(morgan('dev'));
 
-// middleware, modifies incoming data
-app.use(express.json());
+// Limit request from the same IP
+// the below allows one hundred requests from the same ip in one hour
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!'
+});
+app.use('/api', limiter); // limiter will only affect routes starting with /api/.../...
 
+// Body parser, reading data from body into req.body
+// middleware, modifies incoming data
+app.use(express.json({ limit: '10kb' })); // limits the body size to 10kb or less, higher than that won't be accepted
+
+// Data sanitization against NoSQL Query Injection, e.g.: "email": { "$gt": ""} ...along with a known password
+// allows to get logged in without any email.
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent parameter pollution. Cleans up unwanted query strings used in the route
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsAverage',
+      'ratingsQuantity',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ]
+  })
+);
+
+// Serving static files
 // static files in the public folder are accessible
 // e.g.: http://localhost:3000/overview.html will open the overview page
 app.use(express.static(`${__dirname}/public`));
@@ -34,6 +74,7 @@ app.use(express.static(`${__dirname}/public`));
 //   next();
 // });
 
+// Test Middleware
 app.use((req, res, next) => {
   // custom var given to the request
   req.requestTime = new Date().toISOString();

@@ -21,6 +21,22 @@ const createSendToken = (user, statusCode, res) => {
   // AUTHENTICATION TOKEN
   const token = signToken(user._id);
 
+  // cookie config
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000 // day converted to milliseconds
+    ),
+    secure: env.NODE_ENV === 'production', // only true in production, where https is enabled
+    httpOnly: true
+  };
+
+  // Removes password from output, because it is
+  // being sent along to client on creation
+  user.password = undefined;
+
+  // cookie
+  res.cookie('jwt', token, cookieOptions);
+
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -37,12 +53,13 @@ exports.signup = catchAsync(async (req, res, next) => {
   // REPLACED BY, so only the data specified here is
   // going to get saved to the new user, and nothing more.
   // Now to set an admin, it is only possible manually at the database itself
-  const { name, email, password, passwordConfirm } = req.body;
+  const { name, email, password, passwordConfirm, role } = req.body;
   const newUser = await User.create({
     name: name,
     email: email,
     password: password,
-    passwordConfirm: passwordConfirm
+    passwordConfirm: passwordConfirm,
+    role: role
   });
 
   createSendToken(newUser, 201, res);
