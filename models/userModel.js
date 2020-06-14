@@ -3,52 +3,58 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    default: '',
-    required: [true, 'Please, tell us your name!'],
-    maxlength: [120, 'Your name must have less than 120 character.']
-  },
-  email: {
-    type: String,
-    required: [true, 'Please provide your email.'],
-    unique: true, // the identifier of the user, which should be unique
-    lowercase: true, // turns the string to lowercase
-    validate: [validator.isEmail, 'Please provide a valid email'] // custom validator
-  },
-  photo: String,
-  role: {
-    type: String,
-    enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user'
-  },
-  password: {
-    type: String,
-    required: [true, 'Please provide your password.'],
-    minlength: [8, 'Your password must have 8 or more characters'],
-    select: false // won't be returned to client, because this would be obviously a security flaw, even if encrypted
-  },
-  passwordConfirm: {
-    type: String,
-    required: [true, 'Please confirm your password'],
-    validate: {
-      // This only works on SAVE and CREATE!!! so DO NOT use UPDATE when changing password
-      validator: function (el) {
-        return el === this.password; // abc === abc, true; abc === xyz, false
-      },
-      message: 'Passwords are not the same!'
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      default: '',
+      required: [true, 'Please, tell us your name!'],
+      maxlength: [120, 'Your name must have less than 120 character.']
+    },
+    email: {
+      type: String,
+      required: [true, 'Please provide your email.'],
+      unique: true, // the identifier of the user, which should be unique
+      lowercase: true, // turns the string to lowercase
+      validate: [validator.isEmail, 'Please provide a valid email'] // custom validator
+    },
+    photo: String,
+    role: {
+      type: String,
+      enum: ['user', 'guide', 'lead-guide', 'admin'],
+      default: 'user'
+    },
+    password: {
+      type: String,
+      required: [true, 'Please provide your password.'],
+      minlength: [8, 'Your password must have 8 or more characters'],
+      select: false // won't be returned to client, because this would be obviously a security flaw, even if encrypted
+    },
+    passwordConfirm: {
+      type: String,
+      required: [true, 'Please confirm your password'],
+      validate: {
+        // This only works on SAVE and CREATE!!! so DO NOT use UPDATE when changing password
+        validator: function (el) {
+          return el === this.password; // abc === abc, true; abc === xyz, false
+        },
+        message: 'Passwords are not the same!'
+      }
+    },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false
     }
   },
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  active: {
-    type: Boolean,
-    default: true,
-    select: false
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
-});
+);
 
 // PASSWORD ENCRYPTION MIDDLEWARE
 // password encryption, between getting and saving the data

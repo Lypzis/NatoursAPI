@@ -2,8 +2,25 @@ const express = require('express');
 
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewRouter = require('./reviewRoutes');
 
 const router = express.Router();
+
+// REFACTORED to the below
+// POST /tour/384hfhufhjd/reviews review is a child of tour coming from an loged in user
+// GET /tour/384hfhufhjd/reviews
+// GET /tour/384hfhufhjd/reviews/374843hfd
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictedTo('user'),
+//     reviewController.createReview
+//   );
+
+// This means that when a URL like this '/tour/384hfhufhjd/reviews' comes,
+// redirects it to 'reviewRouter' instead
+router.use('/:tourId/reviews', reviewRouter);
 
 // only works here, on this router, where it is specified
 // receives de 'id' as value, then checks it

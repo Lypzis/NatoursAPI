@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
 
+// const User = require('./userModel'); // in case of embedding
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -13,7 +15,7 @@ const tourSchema = new mongoose.Schema(
         40,
         'A tour name must have less or be equal to 40 characters'
       ], // a validator
-      minlength: [10, 'A tour name must have less or be equal to 40 characters'] // another validator
+      minlength: [10, 'A tour name must have more or be equal to 10 characters'] // another validator
       // will check if contains only letters, check 'validator' docs
       // also trhows errors if it find spaces between words,
       // so not very useful here
@@ -88,7 +90,34 @@ const tourSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    // 'startLocation' and 'locations' are embedded(documents[or objects :D] inside documents) documents
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        dafault: 'Point', // always the default though
+        enum: ['Point']
+      },
+      coordinates: [Number], // an array of numbers is expected
+      address: String,
+      description: String
+    },
+    locations: [
+      // an array of object locations
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        description: String,
+        day: Number
+      }
+    ],
+    // guides: Array // in case of embedding
+    guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }] // referencing
   },
   // this second argument will enable virtual properties
   {
@@ -109,6 +138,15 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7; // calculation for the week, each week has 7 days and durantion refer to the schema 'duration' attribute
 }); // created on each get
 
+// Virtual Populate
+// for parent referencing its tour reviews,
+// without persisting the data into an ilimited array as if it was a child referencing
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour', // this is the field to populate in 'Review'
+  localField: '_id' // this is the 'id' from this tour
+});
+
 // DOCUMENT MIDDLEWARE, which will run before an event
 // in this case the 'save' (only runs on .save() and .create()), not for update
 tourSchema.pre('save', function (next) {
@@ -117,6 +155,19 @@ tourSchema.pre('save', function (next) {
 
   next(); // REMEMBER to always add this or it will end up stuck forever D:
 });
+
+// Middleware for embedding guides on 'save'
+// Finds user with corresponding 'id', then
+// adds him to the 'this.guides' array
+// tourSchema.pre('save', async function (next) {
+//   // will end up returning an array of promises
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+
+//   // resolve all promises of the array and set the result to guides
+//   this.guides = await Promise.all(guidesPromises);
+
+//   next();
+// });
 
 // it can have multiple 'pre's
 // tourSchema.pre('save', function (next) {
@@ -141,6 +192,18 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } }); // get all tours that are'nt secret
 
   this.start = Date.now();
+
+  next();
+});
+
+// populate will bring the guides documents along with the tour which references them
+// the select options with the '-' in front of the attributes will remove them from the result
+tourSchema.pre(/^find/, function (next) {
+  // REMEMBER: 'this' points to the current query
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt'
+  });
 
   next();
 });

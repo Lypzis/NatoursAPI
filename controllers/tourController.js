@@ -3,6 +3,7 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const factory = require('./handlerFactory');
 
 // Just for test purposes
 // file containing tours, reading the file outside for non-blocking reasons
@@ -75,7 +76,9 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+  // populate will bring the guides documents along with the tour which references them
+  // the select options with the '-' in front of the attributes will remove them from the result
+  const tour = await Tour.findById(req.params.id).populate('reviews'); // check the tour model, for virtual populate
 
   // in case of no tour, immediately returns error
   if (!tour) return next(new AppError('No tour found with that ID', 404));
@@ -99,52 +102,22 @@ exports.getTour = catchAsync(async (req, res, next) => {
   // }
 });
 
-exports.createTour = catchAsync(async (req, res, next) => {
-  // const newTour = new Tour({});
-  // newTour.save();
-  // but a better way: 'Tour.create({})' does both the above :D
-  const newTour = await Tour.create(req.body);
+exports.createTour = factory.createOne(Tour);
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
+// REFACTORED TO ABOVE, as will all others
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id);
 
-  res.status(201).json({
-    // 201 stands for created status
-    status: 'success',
-    data: {
-      tour: newTour
-    }
-  });
-});
+//   // in case of no tour, immediately returns error
+//   if (!tour) return next(new AppError('No tour found with that ID', 404));
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-  // find by id and update its body parameters, duh :D
-  // will work only with 'patch' requests, not put, since 'put' replaces the object
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true
-  }); // new here means that the newly updated document is returned
-
-  // in case of no tour, immediately returns error
-  if (!tour) return next(new AppError('No tour found with that ID', 404));
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour
-    }
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  // in case of no tour, immediately returns error
-  if (!tour) return next(new AppError('No tour found with that ID', 404));
-
-  // case of delete, status is 204(no content), data is null
-  res.status(204).json({
-    status: 'success',
-    data: null
-  });
-});
+//   // case of delete, status is 204(no content), data is null
+//   res.status(204).json({
+//     status: 'success',
+//     data: null
+//   });
+// });
 
 // almost like 'group by' remember?
 exports.getTourStats = catchAsync(async (req, res, next) => {

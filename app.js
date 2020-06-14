@@ -8,6 +8,7 @@ const hpp = require('hpp');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -104,6 +105,7 @@ const apiVersion = `/api/v1`;
 
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);
+app.use(`${apiVersion}/reviews`, reviewRouter);
 
 // this middleware will handle all unexistent routes
 // it will arrive here if none of the previous
