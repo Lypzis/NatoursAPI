@@ -1,5 +1,6 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const APIFeatures = require('../utils/apiFeatures');
 
 /**
  * Generic document delete function
@@ -40,11 +41,15 @@ exports.updateOne = Model =>
     res.status(200).json({
       status: 'success',
       data: {
-        document
+        data: document
       }
     });
   });
 
+/**
+ * Generic document create function
+ * @param {mongoose.model} Model an mongoose schema model
+ */
 exports.createOne = Model =>
   catchAsync(async (req, res, next) => {
     // const newTour = new Tour({});
@@ -56,7 +61,58 @@ exports.createOne = Model =>
       // 201 stands for created status
       status: 'success',
       data: {
-        document: newDocument
+        data: newDocument
+      }
+    });
+  });
+
+/**
+ * Generic document get function, with the
+ * option to populate reference fields.
+ * @param {mongoose.model} Model an mongoose schema model
+ * @param {String} populateOptions the attribute name to populate, defaults to null
+ */
+exports.getOne = (Model, populateOptions = null) =>
+  catchAsync(async (req, res, next) => {
+    let query = Model.findById(req.params.id);
+    if (populateOptions) query = query.populate(populateOptions); // check the document model, for virtual populate
+
+    const document = await query;
+
+    // in case of no document, immediately returns error
+    if (!document)
+      return next(new AppError('No document found with that ID', 404));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        data: document
+      }
+    });
+  });
+
+exports.getAll = Model =>
+  catchAsync(async (req, res, next) => {
+    // To allow for nested GET reviews for tour (hack)
+    // only reviews that match tour id will be found, instead of all of them which wouldn't make sense
+    let filter = {};
+    if (req.params.tourId) filter = { tour: req.params.tourId };
+
+    // EXECUTE QUERY
+    const features = new APIFeatures(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const documents = await features.query; // await for the query
+
+    // SEND RESPONSE
+    res.status(200).json({
+      status: 'success',
+      results: documents.length,
+      data: {
+        data: documents
       }
     });
   });
