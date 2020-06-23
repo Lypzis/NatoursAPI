@@ -10,6 +10,9 @@ const authController = require('../controllers/authController');
 // will merge with tour route to get access to its params here
 const router = express.Router({ mergeParams: true });
 
+// No one can access the below routes without being logged in(authenticated)
+router.use(authController.protect);
+
 router
   .route('/')
   .get(reviewController.getAllReviews)
@@ -24,7 +27,13 @@ router
 router
   .route('/:id')
   .get(reviewController.getReview)
-  .patch(reviewController.updateReview)
-  .delete(reviewController.deleteReview);
+  .patch(
+    authController.restrictedTo('user', 'admin'),
+    reviewController.updateReview
+  )
+  .delete(
+    authController.restrictedTo('user', 'admin'),
+    reviewController.deleteReview
+  );
 
 module.exports = router;

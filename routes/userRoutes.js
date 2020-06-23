@@ -12,14 +12,20 @@ router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
-router.patch(
-  '/updatePassword',
-  authController.protect,
-  authController.updatePassword
-);
-router.patch('/updateMe', authController.protect, userController.updateMe);
+// Protect all routes after this middleware
+// adding this here will affect all routes below,
+// meaning less repeated code :D
+router.use(authController.protect);
 
-router.delete('/deleteMe', authController.protect, userController.deleteMe);
+router.patch('/updatePassword', authController.updatePassword);
+
+router.get('/me', userController.getMe, userController.getUser);
+router.patch('/updateMe', userController.updateMe);
+router.delete('/deleteMe', userController.deleteMe);
+
+// All routes after this are only available to administrators
+// thanks to the middleaware strategically positioned here :D
+router.use(authController.restrictedTo('admin'));
 
 router
   .route('/')

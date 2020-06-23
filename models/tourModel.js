@@ -46,7 +46,9 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 4.5,
       min: [1, 'Rating must be above or equal 1.0'], // more types of validators
-      max: [5, 'Rating must be below or equal 5.0']
+      max: [5, 'Rating must be below or equal 5.0'],
+      // 4.6666 => 46.666 => 47 => 4.7 will run each time a value is set to this field
+      set: val => Math.round(val * 10) / 10
     },
     ratingsQuantity: {
       type: Number,
@@ -125,6 +127,12 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
+
+// 1 asc, -1 desc
+//tourSchema.index({ price: 1});
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // compound
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' }); // for geolocation
 
 // virtual properties
 // properties that won't be stored in the database but will actually be a
