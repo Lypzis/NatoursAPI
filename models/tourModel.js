@@ -224,14 +224,14 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 // AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function (next) {
-  // will add another match condition to beginning of the array pipeline
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+// tourSchema.pre('aggregate', function (next) {
+//   // will add another match condition to beginning of the array pipeline
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 
-  console.log(this.pipeline());
+//   // console.log(this.pipeline());
 
-  next();
-});
+//   next();
+// });
 
 const Tour = mongoose.model('Tour', tourSchema);
 

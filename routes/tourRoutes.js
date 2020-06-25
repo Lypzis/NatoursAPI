@@ -33,6 +33,8 @@ router
 // /tours-within?distance=233&center=-40,45&unit=mi  // another way to put this route
 // /tours-within/233/center/-40,45/unit/mi // instead, I'm using this.
 
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
 router
   .route('/')
   // catchAsync can be applied here as '.get(catchAsync(tourController.getAllTours))'

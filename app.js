@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -13,6 +14,15 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
+
+// defines view engine, requires pug module installation;
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+// Serving static files
+// static files in the public folder are accessible
+// e.g.: http://localhost:3000/overview.html will open the overview page
+app.use(express.static(path.join(__dirname, 'public')));
 
 const { env } = process;
 
@@ -61,11 +71,6 @@ app.use(
   })
 );
 
-// Serving static files
-// static files in the public folder are accessible
-// e.g.: http://localhost:3000/overview.html will open the overview page
-app.use(express.static(`${__dirname}/public`));
-
 // custom middleware, next is a function proper to middlewares
 // app.use((req, res, next) => {
 //   //console.log('Hello from the middleware :D');
@@ -102,6 +107,14 @@ app.use((req, res, next) => {
 
 // ROUTES
 const apiVersion = `/api/v1`;
+
+// for views
+app.get('/', (req, res) => {
+  res.status(200).render('base', {
+    tour: 'The Forest Hiker',
+    user: 'Jonas'
+  }); // express will know what to look for at the 'views' folder set
+});
 
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);
