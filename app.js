@@ -10,6 +10,7 @@ const hpp = require('hpp');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -108,14 +109,7 @@ app.use((req, res, next) => {
 // ROUTES
 const apiVersion = `/api/v1`;
 
-// for views
-app.get('/', (req, res) => {
-  res.status(200).render('base', {
-    tour: 'The Forest Hiker',
-    user: 'Jonas'
-  }); // express will know what to look for at the 'views' folder set
-});
-
+app.use('/', viewRouter); // this is not part of API
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);
 app.use(`${apiVersion}/reviews`, reviewRouter);
