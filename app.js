@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -51,6 +52,8 @@ app.use('/api', limiter); // limiter will only affect routes starting with /api/
 // middleware, modifies incoming data
 app.use(express.json({ limit: '10kb' })); // limits the body size to 10kb or less, higher than that won't be accepted
 
+app.use(cookieParser());
+
 // Data sanitization against NoSQL Query Injection, e.g.: "email": { "$gt": ""} ...along with a known password
 // allows to get logged in without any email.
 app.use(mongoSanitize());
@@ -88,7 +91,7 @@ app.use((req, res, next) => {
 
   //console.log(x); //testing uncaught exceptions
 
-  //console.log(req.headers);
+  console.log(req.cookies);
 
   next();
 });
