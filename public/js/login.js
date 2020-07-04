@@ -1,13 +1,14 @@
 /* eslint-disable */
 
-const login = async (email, password) => {
-  console.log(email);
-  console.log(password);
+import axios from 'axios';
 
+import { showAlert } from './alert';
+
+export const login = async (email, password) => {
   try {
     const res = await axios({
       method: 'POST',
-      url: 'http://127.0.0.1:3000/api/v1/users/login',
+      url: 'http://localhost:3000/api/v1/users/login',
       data: {
         // remember, the endpoint expects email and password
         email,
@@ -15,17 +16,26 @@ const login = async (email, password) => {
       }
     });
 
-    console.log(res);
+    if (res.data.status === 'success') {
+      showAlert('success', 'Logged in successfully!');
+      window.setTimeout(() => {
+        location.assign('/'); // redirects to main page after .5 seconds, after closing alert
+      }, 500);
+    }
   } catch (err) {
-    console.log(err);
+    showAlert('error', err.response.data.message);
   }
 };
 
-document.querySelector('.form').addEventListener('submit', event => {
-  event.preventDefault();
-
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  login(email, password);
-});
+export const logout = async () => {
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: 'http://localhost:3000/api/v1/users/logout'
+    });
+    // after an invalid token was set to be sent, reload page, and you're logged out
+    if (res.data.status === 'success') location.reload(true);
+  } catch (err) {
+    showAlert('error', 'Error logging out! Try again.');
+  }
+};
