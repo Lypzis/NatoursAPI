@@ -1,4 +1,5 @@
 node_modules
 yarn.lock
 .cache
+public/**/bundle.js.map
 config.env

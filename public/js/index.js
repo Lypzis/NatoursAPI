@@ -3,14 +3,22 @@
 import '@babel/polyfill'; // just include it here, and it will do the magic
 
 import { login, logout } from './login';
+import { updateSettings } from './updateSettings';
 import { displayMap } from './mapbox';
 
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
-const loginForm = document.querySelector('.form');
+const loginForm = document.querySelector('.form--login');
+
+const userDataForm = document.querySelector('.form-user-data');
+const userPasswordForm = document.querySelector('.form-user-password');
 
 const email = document.getElementById('email');
+const name = document.getElementById('name');
+
+const passwordCurrent = document.getElementById('password-current');
 const password = document.getElementById('password');
+const passwordConfirm = document.getElementById('password-confirm');
 
 const logOutButton = document.querySelector('.nav__el--logout');
 /////////////////
@@ -32,4 +40,32 @@ if (loginForm)
   });
 
 if (logOutButton) logOutButton.addEventListener('click', logout);
+
+if (userDataForm)
+  userDataForm.addEventListener('submit', event => {
+    event.preventDefault();
+
+    updateSettings({ name: name.value, email: email.value }, 'data');
+  });
+
+if (userPasswordForm)
+  userPasswordForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submitButton = document.querySelector('.btn--save-password');
+    submitButton.innerHTML = 'Updating...';
+
+    await updateSettings(
+      {
+        password: passwordCurrent.value,
+        newPassword: password.value,
+        newPasswordConfirm: passwordConfirm.value
+      },
+      'password'
+    );
+
+    submitButton.innerHTML = 'save password';
+    passwordCurrent.value = '';
+    password.value = '';
+    passwordConfirm.value = '';
+  });
 ///////////////
