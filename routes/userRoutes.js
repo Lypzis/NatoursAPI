@@ -21,7 +21,12 @@ router.use(authController.protect);
 router.patch('/updatePassword', authController.updatePassword);
 
 router.get('/me', userController.getMe, userController.getUser);
-router.patch('/updateMe', userController.updateMe);
+// 'photo' is the 'name' field at the DOM element
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteMe', userController.deleteMe);
 
 // All routes after this are only available to administrators
