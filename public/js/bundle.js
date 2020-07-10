@@ -8861,6 +8861,7 @@ var userDataForm = document.querySelector('.form-user-data');
 var userPasswordForm = document.querySelector('.form-user-password');
 var email = document.getElementById('email');
 var name = document.getElementById('name');
+var photo = document.getElementById('photo');
 var passwordCurrent = document.getElementById('password-current');
 var password = document.getElementById('password');
 var passwordConfirm = document.getElementById('password-confirm');
@@ -8880,10 +8881,12 @@ if (loginForm) loginForm.addEventListener('submit', function (event) {
 if (logOutButton) logOutButton.addEventListener('click', _login.logout);
 if (userDataForm) userDataForm.addEventListener('submit', function (event) {
   event.preventDefault();
-  (0, _updateSettings.updateSettings)({
-    name: name.value,
-    email: email.value
-  }, 'data');
+  var form = new FormData();
+  form.append('name', name.value);
+  form.append('email', email.value);
+  form.append('photo', photo.files[0]);
+  console.log(form);
+  (0, _updateSettings.updateSettings)(form, 'data');
 });
 if (userPasswordForm) userPasswordForm.addEventListener('submit', /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event) {
@@ -8948,7 +8951,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46077" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43513" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

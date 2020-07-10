@@ -1,19 +1,22 @@
 const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
 
-const multerStorage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, 'public/img/users');
-  },
-  filename: (req, file, callback) => {
-    // user-7747673-3322323.jpeg
-    const ext = file.mimetype.split('/')[1];
-    callback(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-  }
-});
+// DEPRECATED by the use of Sharp package
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, callback) => {
+//     callback(null, 'public/img/users');
+//   },
+//   filename: (req, file, callback) => {
+//     // user-7747673-3322323.jpeg
+//     const ext = file.mimetype.split('/')[1];
+//     callback(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   }
+// });
+const multerStorage = multer.memoryStorage(); // stored as a buffer
 
 const multerFilter = (req, file, callback) => {
   if (file.mimetype.startsWith('image')) callback(null, true);
@@ -29,6 +32,21 @@ const multerFilter = (req, file, callback) => {
 const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  // image buffer is read here
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -60,9 +78,6 @@ exports.getMe = (req, res, next) => {
 };
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  console.log(req.file);
-  console.log(req.body);
-
   // // 1) Create error if user POSTs password data
   // "Cannot read property 'passwordConfirm' of undefined"
   if (req.body.password || req.body.passwordConfirm)
@@ -76,6 +91,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // 2) Filtered out unwanted fields,
   // making that only name and email are allowed to be updated
   const filteredBody = filterObj(req.body, 'name', 'email');
+  // if there is a file(photo), append it to the object, so it's updated as well
+  if (req.file) filteredBody.photo = req.file.filename;
 
   // 3) Update user document
   // in this case 'findByIdAndUpdate' can be used because

@@ -15,6 +15,7 @@ const userPasswordForm = document.querySelector('.form-user-password');
 
 const email = document.getElementById('email');
 const name = document.getElementById('name');
+const photo = document.getElementById('photo');
 
 const passwordCurrent = document.getElementById('password-current');
 const password = document.getElementById('password');
@@ -45,7 +46,14 @@ if (userDataForm)
   userDataForm.addEventListener('submit', event => {
     event.preventDefault();
 
-    updateSettings({ name: name.value, email: email.value }, 'data');
+    const form = new FormData();
+    form.append('name', name.value);
+    form.append('email', email.value);
+    form.append('photo', photo.files[0]);
+
+    console.log(form);
+
+    updateSettings(form, 'data');
   });
 
 if (userPasswordForm)
