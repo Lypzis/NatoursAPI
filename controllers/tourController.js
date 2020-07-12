@@ -1,8 +1,64 @@
 //const fs = require('fs');
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 const AppError = require('../utils/appError');
+
+const multerStorage = multer.memoryStorage(); // stored as a buffer
+
+const multerFilter = (req, file, callback) => {
+  if (file.mimetype.startsWith('image')) callback(null, true);
+  else
+    callback(
+      new AppError('Not an image! Please upload only images.', 400),
+      false
+    );
+};
+
+// upload images into the file system, not the database, never in database
+// at database, just the link to the image.(req, file, callback)
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 }
+]);
+
+// upload.single('image') => req.file
+// upload.array('images') => req.files
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  // 1) Cover Image
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333) // 3:2 ratio
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  // 2) Images
+  //req.body.images = [];
+  const imagesPromise = req.files.images.map(async (file, index) => {
+    const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpeg`;
+
+    await sharp(file.buffer)
+      .resize(2000, 1333) // 3:2 ratio
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${filename}`);
+
+    return filename;
+  });
+
+  req.body.images = await Promise.all(imagesPromise);
+
+  next();
+});
 
 // Just for test purposes
 // file containing tours, reading the file outside for non-blocking reasons
