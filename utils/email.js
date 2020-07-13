@@ -12,9 +12,18 @@ module.exports = class Email {
   }
 
   newTransport() {
-    if (process.env.NODE_ENV === 'production')
-      // Sendgrid
-      return 1;
+    if (process.env.NODE_ENV === 'production') {
+      // Sendgrid DOESN'T WORK
+      return nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          password: process.env.SENDGRID_PASSWORD
+        }
+      });
+    }
 
     // 1) Create a transporter
     return nodemailer.createTransport({

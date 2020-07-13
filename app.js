@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -118,6 +119,7 @@ app.use('/', viewRouter); // this is not part of API
 app.use(`${apiVersion}/tours`, tourRouter);
 app.use(`${apiVersion}/users`, userRouter);
 app.use(`${apiVersion}/reviews`, reviewRouter);
+app.use(`${apiVersion}/booking`, bookingRouter);
 
 // this middleware will handle all unexistent routes
 // it will arrive here if none of the previous
