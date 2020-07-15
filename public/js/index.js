@@ -5,6 +5,7 @@ import '@babel/polyfill'; // just include it here, and it will do the magic
 import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
 import { displayMap } from './mapbox';
+import { bookTour } from './stripe';
 
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
@@ -20,6 +21,8 @@ const photo = document.getElementById('photo');
 const passwordCurrent = document.getElementById('password-current');
 const password = document.getElementById('password');
 const passwordConfirm = document.getElementById('password-confirm');
+
+const bookButton = document.getElementById('book-tour');
 
 const logOutButton = document.querySelector('.nav__el--logout');
 /////////////////
@@ -75,5 +78,16 @@ if (userPasswordForm)
     passwordCurrent.value = '';
     password.value = '';
     passwordConfirm.value = '';
+  });
+
+if (bookButton)
+  bookButton.addEventListener('click', event => {
+    event.preventDefault();
+
+    event.target.textContent = 'Processing...';
+
+    const { tourId } = event.target.dataset; // tour-id is automatically converted to tourId
+
+    bookTour(tourId);
   });
 ///////////////
