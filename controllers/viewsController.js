@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -46,6 +47,21 @@ exports.getAccount = (req, res) => {
     title: 'My account'
   });
 };
+
+exports.getMyTours = catchAsync(async (req, res, next) => {
+  // 1) Find all bookings
+  const bookings = await Booking.find({ user: req.user.id });
+
+  // 2) Find the tours with the returned IDs
+  const tourIDs = bookings.map(booking => booking.tour);
+  const tours = await Tour.find({ _id: { $in: tourIDs } }); // select all tours that have tour ids in the array 'tourIDs'
+
+  // since overview shows tours, it can be reused here to show just the ones selected
+  res.status(200).render('overview', {
+    title: 'My Tours',
+    tours
+  });
+});
 
 exports.updateUserData = catchAsync(async (req, res, next) => {
   //const { name, email } = req.body; // the names given at the html body: account.pug
