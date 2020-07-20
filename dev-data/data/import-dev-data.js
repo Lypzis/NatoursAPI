@@ -10,14 +10,13 @@ const DB =
 
 // Connecting to our database with mongoose
 // NOTE: if using local database, just pass instead of DB: process.env.DATABASE_LOCAL
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false
-  })
-  .then(() => console.log('DB connection successful!'));
+mongoose.connect(DB, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false
+});
+//.then(() => console.log('DB connection successful!'));
 
 // READ JSON FILE
 const tours = fs.readFileSync(`${__dirname}/tours.json`, 'utf-8');
@@ -30,9 +29,9 @@ const importData = async () => {
     await Tour.create(JSON.parse(tours));
     await User.create(JSON.parse(users), { validateBeforeSave: false });
     await Review.create(JSON.parse(reviews));
-    console.log('Data successfully loaded!');
+    //console.log('Data successfully loaded!');
   } catch (err) {
-    console.log(err);
+    // console.log(err);
   }
 
   // to stop after running
@@ -45,9 +44,9 @@ const deleteData = async () => {
     await Tour.deleteMany();
     await User.deleteMany();
     await Review.deleteMany();
-    console.log('Data successfully deleted!');
+    //console.log('Data successfully deleted!');
   } catch (err) {
-    console.log(err);
+    //    console.log(err);
   }
 
   // to stop after running
@@ -56,7 +55,7 @@ const deleteData = async () => {
 
 // SHOW OPTIONS
 const showOptions = () => {
-  console.log('use --import to import data or use --delete to delete all data');
+  //console.log('use --import to import data or use --delete to delete all data');
   // to stop after running
   process.exit();
 };

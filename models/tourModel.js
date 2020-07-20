@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
+//const validator = require('validator');
 
 // const User = require('./userModel'); // in case of embedding
 
@@ -218,7 +218,7 @@ tourSchema.pre(/^find/, function (next) {
 
 // 'post' happens after the find executes and 'pre' before, just to make things clear :D
 tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query took: ${Date.now() - this.start} milliseconds!`);
+  // console.log(`Query took: ${Date.now() - this.start} milliseconds!`);
   //console.log(docs);
   next();
 });

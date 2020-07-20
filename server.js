@@ -44,7 +44,7 @@ const port = process.env.PORT || 3000;
 
 // starts the server listening;
 const server = app.listen(port, () => {
-  console.log(`App running on port ${port}...`); // callback when starts listening
+  //console.log(`App running on port ${port}...`); // callback when starts listening
 });
 ///////////////////////////////////////
 
@@ -52,8 +52,8 @@ const server = app.listen(port, () => {
 process.on('unhandledRejection', err => {
   // if gets to this point, there isn't much else to do :(
   // only exit and pass '1' for 'rejection'
-  console.log('UNHANDLER REJECTION! Shutting down...');
-  console.log(err.name, err.message);
+  // console.log('UNHANDLER REJECTION! Shutting down...');
+  // console.log(err.name, err.message);
 
   // server.close finishes all the pending requests first
   // and then shuts down gracefully, ALWAYS DO LIKE THIS,

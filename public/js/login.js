@@ -8,7 +8,7 @@ export const login = async (email, password) => {
   try {
     const res = await axios({
       method: 'POST',
-      url: 'http://localhost:3000/api/v1/users/login',
+      url: '/api/v1/users/login', // url like that works only when website and server(API) are hosted on the same place
       data: {
         // remember, the endpoint expects email and password
         email,
@@ -31,7 +31,7 @@ export const logout = async () => {
   try {
     const res = await axios({
       method: 'GET',
-      url: 'http://localhost:3000/api/v1/users/logout'
+      url: '/api/v1/users/logout'
     });
     // after an invalid token was set to be sent, reload page, and you're logged out
     if (res.data.status === 'success') location.reload(true);
