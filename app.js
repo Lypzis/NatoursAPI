@@ -19,6 +19,9 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
+// for Heroku secure header
+app.enable('trust proxy');
+
 // defines view engine, requires pug module installation;
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));

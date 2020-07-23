@@ -52,13 +52,21 @@ const server = app.listen(port, () => {
 process.on('unhandledRejection', err => {
   // if gets to this point, there isn't much else to do :(
   // only exit and pass '1' for 'rejection'
-  // console.log('UNHANDLER REJECTION! Shutting down...');
-  // console.log(err.name, err.message);
+  console.log('UNHANDLER REJECTION! Shutting down...');
+  console.log(err.name, err.message);
 
   // server.close finishes all the pending requests first
   // and then shuts down gracefully, ALWAYS DO LIKE THIS,
   // instead of directly calling process.exit
   server.close(() => {
     process.exit(1);
+  });
+});
+
+// Responding to a heroku SIGTERM signal, it is sent every 24h
+process.on('SIGTERM', () => {
+  console.log('SIGTERM RECEIVED. Shutting down gracefully.');
+  server.close(() => {
+    console.log('Process terminated!');
   });
 });
