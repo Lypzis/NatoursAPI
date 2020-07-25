@@ -2,7 +2,7 @@ const express = require('express');
 
 const viewsController = require('../controllers/viewsController');
 const authController = require('../controllers/authController');
-const bookingController = require('../controllers/bookingController');
+//const bookingController = require('../controllers/bookingController');
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ const router = express.Router();
 // at the database, then redirects to the root overview
 router.get(
   '/',
-  bookingController.createBookingCheckout, // TEMP, until deployed to a server
+  // bookingController.createBookingCheckout, // TEMP, until deployed to a server
   authController.isLoggedIn,
   viewsController.getOverview
 );
