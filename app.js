@@ -8,6 +8,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -34,6 +35,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 const { env } = process;
 
 // MIDDLEWARES /////////////////////////
+
+// Implement CORS
+// Access-Control-Allow-Origin * (mean that it is allowed to all sites, it can be set to an specific though)
+app.use(cors()); // add headers to allow cors
+// to handle cors complex requests(like delete or patch), '*' allowed to all endpoints
+app.options('*', cors());
 
 // Set security HTTP headers
 app.use(helmet());
