@@ -18,7 +18,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     // success_url: `${req.protocol}://${req.get('host')}/?tour=${
     //   req.params.tourID
     // }&user=${req.user.id}&price=${tour.price}`,
-    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`, // will set an alert param
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourID,
@@ -62,6 +62,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 const createBookingCheckout = async session => {
   const tour = session.client_reference_id; // set at the above 'getCheckoutSession';
   const user = (await User.findOne({ email: session.customer_email })).id; // only the id is wanted
+  // the only difference is here 'display_items' instead of 'line_items'
   const price = session.display_items[0].amount / 100; // back from the *100 conversion
 
   await Booking.create({ tour, user, price });
